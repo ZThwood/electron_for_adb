@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ADB Control</title>
+        <style>
+            body {
+                font-family: monospace;
+                padding: 20px;
+                background-color: #2d2d2d;
+                color: #f8f8f2;
+            }
+
+            h2 {
+                margin-top: 20px;
+                color: #ffcc00;
+            }
+
+            #command-output {
+                background-color: #1e1e1e;
+                color: #f8f8f2;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 14px;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                height: 300px;
+                overflow-y: auto;
+                border: 1px solid #333;
+            }
+
+            button,
+            input,
+            select {
+                margin: 10px 0;
+                padding: 10px;
+                font-size: 14px;
+                border: 1px solid #444;
+                background-color: #333;
+                color: #f8f8f2;
+                border-radius: 5px;
+            }
+
+            button:hover {
+                background-color: #444;
+            }
+
+            input[type='number'] {
+                width: 150px;
+            }
+            /* 版本信息容器 */
+            .version-container {
+                background-color: #fff;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                width: 300px;
+                margin: auto;
+            }
+
+            /* 每项版本信息的样式 */
+            .version-item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 12px;
+            }
+
+            /* 标签样式 */
+            .version-label {
+                font-weight: bold;
+                color: #555;
+                font-size: 14px;
+            }
+
+            /* 版本号的显示样式 */
+            .version-value {
+                font-size: 14px;
+                color: #007bff; /* 可以根据需求更改颜色 */
+                font-weight: 500;
+            }
+
+            /* 在鼠标悬停时改变版本号的颜色 */
+            .version-value:hover {
+                color: #0056b3;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>ADB Control</h1>
+        <h2>Device List:</h2>
+        <button id="refresh">刷新</button>
+        <pre id="device-list"></pre>
+        <!-- 选择设备 -->
+        <h2>选择设备</h2>
+        <select id="device-select">
+            <option value="">请选择设备</option>
+        </select>
+
+        <h2>Reverse Port</h2>
+        <input type="number" name="port" id="port" value="8081" placeholder="Enter port" />
+        <button id="reverse">Reverse Port</button>
+        <span id="status"></span>
+
+        <h2>更新中间件文件</h2>
+        <label for="middleware-directory">选择中间件文件夹目录:</label>
+        <input type="file" id="middleware-directory" />
+        <button id="update-middleware">更新中间件</button>
+        <span id="update-status"></span>
+
+        <h2>更新 apk</h2>
+        <label for="apk-directory">选择 apk 文件路径:</label>
+        <input type="file" id="apk-directory" name="apkFile" accept=".apk" />
+        <button id="update-apk">更新 apk</button>
+        <span id="update-apk-status"></span>
+
+        <h2>其他功能</h2>
+
+        <button id="restart">Restart Device</button>
+        <button id="openSetting">打开设置</button>
+        <button id="openWebView">打开 WebView</button>
+        <button id="openAppAnalyze">打开应用包分析程序</button>
+
+        <h2>Command Output:</h2>
+        <pre id="command-output"></pre>
+
+        <div class="version-container">
+            <!-- Node、Chromium 和 Electron 版本 -->
+            <h2>版本信息</h2>
+            <div class="version-item">
+                <span class="version-label">Node.js:</span>
+                <span id="node-version" class="version-value"></span>
+            </div>
+            <div class="version-item">
+                <span class="version-label">Chromium:</span>
+                <span id="chrome-version" class="version-value"></span>
+            </div>
+            <div class="version-item">
+                <span class="version-label">Electron:</span>
+                <span id="electron-version" class="version-value"></span>
+            </div>
+        </div>
+        <script src="renderer.js"></script>
+    </body>
+</html>
