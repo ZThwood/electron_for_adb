@@ -1,6 +1,6 @@
 const { exec } = require('child_process');
 // 提取文件夹路径
-function getFolderPaths(files) {
+function getFolderPaths(files: { path: string }[]) {
     const filePath = files[0].path; // 获取文件路径
     // 转换为标准路径格式
     const normalizedPath = filePath.replace(/\\/g, '/'); // 将反斜杠转换为正斜杠
@@ -17,11 +17,11 @@ function getFolderPaths(files) {
 }
 
 // 执行 ADB 命令并回调
-function executeAdbCommand(command, callback) {
+function executeAdbCommand(command: string, callback: Function) {
     // 打印命令到命令行输出区域
     printToCommandOutput(`> ${command}\n`);
 
-    exec(command, (err, stdout, stderr) => {
+    exec(command, (err: { message: any }, stdout: any, stderr: string | undefined) => {
         if (err) {
             console.error('Error executing command:', err);
             printToCommandOutput(`Error: ${err.message}\n`);
@@ -39,12 +39,18 @@ function executeAdbCommand(command, callback) {
 }
 
 // 将输出内容打印到命令行输出区域
-function printToCommandOutput(text) {
+function printToCommandOutput(text: string) {
     const outputArea = document.getElementById('command-output');
+    if (!outputArea) {
+        return;
+    }
     outputArea.textContent += text; // 在现有内容后追加文本
     outputArea.scrollTop = outputArea.scrollHeight; // 自动滚动到最后
 }
 
-exports.getFolderPaths = getFolderPaths;
-exports.executeAdbCommand = executeAdbCommand;
-exports.printToCommandOutput = printToCommandOutput;
+const getDeviceName = () => {
+    const selectHtml = document.getElementById('device-select') as HTMLSelectElement;
+    return selectHtml.value ?? '';
+};
+
+export { getFolderPaths, executeAdbCommand, printToCommandOutput, getDeviceName };

@@ -1,12 +1,17 @@
 {
   "name": "electron_for_adb",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "1.1.0",
+  "main": "dist/main.js",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^22.10.6",
     "electron": "16.0.6"
   },
   "scripts": {
-    "start": "electron ."
+    "start": "yarn build && electron .",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "typescript": "^5.7.3"
   }
 }

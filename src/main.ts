@@ -9,13 +9,17 @@ function createWindow() {
         height: 600,
         webPreferences: {
             nodeIntegration: true,
-            preload: path.join(__dirname, 'renderer.js'),
+            preload: path.join(__dirname, 'business', 'index.js'),
         },
     });
 
-    mainWindow.loadFile('index.html');
+    mainWindow.loadFile('src/ui/index.html');
+    console.log('process.platform', process.env.NODE_ENV);
+
     // 打开开发工具
-    mainWindow.webContents.openDevTools();
+    if (process.env.NODE_ENV !== 'production') {
+        mainWindow.webContents.openDevTools();
+    }
 }
 
 app.whenReady().then(createWindow);

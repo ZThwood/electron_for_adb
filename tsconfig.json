@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "resolveJsonModule": true,
+    "isolatedModules": true, /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
+  },
+  // "include": [
+  //   "src/**/*.ts"
+  // ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ]
+}

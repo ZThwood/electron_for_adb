@@ -1,26 +1,28 @@
-const { getFolderPaths, executeAdbCommand, printToCommandOutput } = require('./utils');
-const { updateApk } = require('./business');
-
+import { enableMonitorAdbPort, updateApk } from './feature';
+import { executeAdbCommand, getDeviceName, getFolderPaths, printToCommandOutput } from './utils';
 // 获取设备列表
 function getDeviceList() {
-    executeAdbCommand('adb devices', (err, result) => {
+    executeAdbCommand('adb devices', (err: { message: any }, result: string) => {
         if (err) {
             console.error('Error getting device list:', err);
-            document.getElementById('device-list').innerText = `Error: ${err.message}`;
+            document.getElementById('device-list')!.innerText = `Error: ${err.message}`;
         } else {
             const deviceList = result
                 .split('\n')
                 .slice(1)
-                .filter(line => line.trim() !== '')
-                .map(line => line.split('\t')[0]);
+                .filter((line: string) => line.trim() !== '')
+                .map((line: string) => line.split('\t')[0]);
             console.log('Device List:', deviceList);
 
             // 填充设备列表到 <select> 下拉框
             const deviceSelect = document.getElementById('device-select');
+            if (!deviceSelect) {
+                return;
+            }
             deviceSelect.innerHTML = '<option value="">请选择设备</option>'; // 清空旧的列表
 
-            deviceList.forEach((deviceId, i) => {
-                const option = document.createElement('option');
+            deviceList.forEach((deviceId: string, i: number) => {
+                const option = document.createElement('option') as HTMLOptionElement;
                 option.value = deviceId;
                 option.textContent = deviceId;
                 if (i === 0) {
@@ -29,14 +31,14 @@ function getDeviceList() {
                 deviceSelect.appendChild(option);
             });
 
-            document.getElementById('device-list').innerText = `Device List: \n${deviceList.join('\n')}`;
+            document.getElementById('device-list')!.innerText = `Device List: \n${deviceList.join('\n')}`;
         }
     });
 }
 
 // 重启设备
-function restartDevice(deviceId) {
-    executeAdbCommand(`adb -s ${deviceId} reboot`, (err, result) => {
+function restartDevice(deviceId: any) {
+    executeAdbCommand(`adb -s ${deviceId} reboot`, (err: { message: any }, result: any) => {
         if (err) {
             console.error('Error rebooting device:', err);
             printToCommandOutput(`Error rebooting device: ${err.message}\n`);
@@ -48,8 +50,8 @@ function restartDevice(deviceId) {
 }
 
 // 反向映射端口
-function reversePort(deviceId, localPort, devicePort) {
-    executeAdbCommand(`adb -s ${deviceId} reverse tcp:${devicePort} tcp:${localPort}`, (err, result) => {
+function reversePort(deviceId: any, localPort: any, devicePort: any) {
+    executeAdbCommand(`adb -s ${deviceId} reverse tcp:${devicePort} tcp:${localPort}`, (err: { message: any }, result: any) => {
         if (err) {
             console.error('Error reversing port:', err);
             printToCommandOutput(`Error reversing port: ${err.message}\n`);
@@ -62,22 +64,22 @@ function reversePort(deviceId, localPort, devicePort) {
 
 // 页面加载完毕时
 window.addEventListener('DOMContentLoaded', () => {
-    const replaceText = (selector, text) => {
+    const replaceText = (selector: string, text: string) => {
         const element = document.getElementById(selector);
         if (element) element.innerText = text;
     };
 
     // 显示 Electron、Node 和 Chrome 版本
     for (const dependency of ['chrome', 'node', 'electron']) {
-        replaceText(`${dependency}-version`, process.versions[dependency]);
+        replaceText(`${dependency}-version`, process.versions[dependency]!);
     }
 
     // 获取设备列表
     getDeviceList();
 
     // 监听重启按钮点击事件
-    document.getElementById('restart').addEventListener('click', () => {
-        const deviceId = document.getElementById('device-select').value;
+    document.getElementById('restart')?.addEventListener('click', () => {
+        const deviceId = getDeviceName();
         if (!deviceId) {
             alert('请选择设备');
             return;
@@ -87,9 +89,9 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     // 监听反向端口映射按钮点击事件
-    document.getElementById('reverse').addEventListener('click', () => {
-        const deviceId = document.getElementById('device-select').value;
-        const port = document.getElementById('port').value;
+    document.getElementById('reverse')?.addEventListener('click', () => {
+        const deviceId = getDeviceName();
+        const port = (document.getElementById('port') as HTMLInputElement).value;
         if (!deviceId) {
             alert('请选择设备');
             return;
@@ -102,8 +104,8 @@ window.addEventListener('DOMContentLoaded', () => {
         reversePort(deviceId, port, port); // 使用相同的端口号进行反向映射
     });
 
-    document.getElementById('openSetting').addEventListener('click', () => {
-        const deviceId = document.getElementById('device-select').value;
+    document.getElementById('openSetting')?.addEventListener('click', () => {
+        const deviceId = getDeviceName();
         if (!deviceId) {
             alert('请选择设备');
             return;
@@ -113,15 +115,15 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     // 新增的功能：更新中间件文件
-    document.getElementById('update-middleware').addEventListener('click', () => {
-        const middlewareDirectory = document.getElementById('middleware-directory').files;
+    document.getElementById('update-middleware')?.addEventListener('click', () => {
+        const middlewareDirectory: any = (document.getElementById('middleware-directory') as HTMLInputElement).files;
         // 判断是否选择了目录
         if (!middlewareDirectory.length) {
             alert('请选择中间件文件目录');
             return;
         }
 
-        const deviceId = document.getElementById('device-select').value;
+        const deviceId = getDeviceName();
         if (!deviceId) {
             alert('请选择设备');
             return;
@@ -132,8 +134,8 @@ window.addEventListener('DOMContentLoaded', () => {
         updateMiddleware(deviceId, middlewarePath);
     });
 
-    document.getElementById('openWebView').addEventListener('click', () => {
-        const deviceId = document.getElementById('device-select').value;
+    document.getElementById('openWebView')?.addEventListener('click', () => {
+        const deviceId = getDeviceName();
         if (!deviceId) {
             alert('请选择设备');
             return;
@@ -141,8 +143,8 @@ window.addEventListener('DOMContentLoaded', () => {
         console.log('openWebView for device:', deviceId);
         openWebView(deviceId);
     });
-    document.getElementById('openAppAnalyze').addEventListener('click', () => {
-        const deviceId = document.getElementById('device-select').value;
+    document.getElementById('openAppAnalyze')?.addEventListener('click', () => {
+        const deviceId = getDeviceName();
         if (!deviceId) {
             alert('请选择设备');
             return;
@@ -151,14 +153,15 @@ window.addEventListener('DOMContentLoaded', () => {
         openAppAnalyze(deviceId);
     });
 
-    document.getElementById('refresh').addEventListener('click', () => {
+    document.getElementById('refresh')?.addEventListener('click', () => {
         console.log('refresh for device:');
         getDeviceList();
     });
 
     // 新增的功能：更新中间件文件
-    document.getElementById('update-apk').addEventListener('click', () => {
-        const apkFiles = document.getElementById('apk-directory').files[0];
+    document.getElementById('update-apk')?.addEventListener('click', () => {
+        const inputElement = document.getElementById('apk-directory') as HTMLInputElement;
+        const apkFiles = inputElement.files![0] as any;
 
         // 判断是否选择了目录
         if (!apkFiles) {
@@ -166,7 +169,7 @@ window.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const deviceId = document.getElementById('device-select').value;
+        const deviceId = getDeviceName();
         if (!deviceId) {
             alert('请选择设备');
             return;
@@ -176,10 +179,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
         updateApk(deviceId, apkFiles.path);
     });
+
+    document.getElementById('duration-reverse')?.addEventListener('click', () => {
+        const deviceId = getDeviceName();
+        const port = (document.getElementById('port') as HTMLInputElement).value;
+        if (!deviceId) {
+            alert('请选择设备');
+            return;
+        }
+        if (!port) {
+            alert('请输入端口号');
+            return;
+        }
+        console.log('Duration reverse port button clicked for device:', deviceId, 'with port:', port);
+        enableMonitorAdbPort(deviceId, port); // 使用相同的端口号进行反向映射
+    });
 });
 
-const openAppAnalyze = deviceId => {
-    executeAdbCommand(`adb -s ${deviceId} shell am start -n com.absinthe.libchecker/.features.home.ui.MainActivity`, (err, result) => {
+const openAppAnalyze = (deviceId: any) => {
+    executeAdbCommand(`adb -s ${deviceId} shell am start -n com.absinthe.libchecker/.features.home.ui.MainActivity`, (err: { message: any }, result: any) => {
         if (err) {
             console.error('Error open setting for device:', err);
             printToCommandOutput(`Error open setting for device: ${err.message}\n`);
@@ -190,8 +208,8 @@ const openAppAnalyze = deviceId => {
     });
 };
 
-const openSetting = deviceId => {
-    executeAdbCommand(`adb -s ${deviceId} shell am start -a android.settings.SETTINGS`, (err, result) => {
+const openSetting = (deviceId: any) => {
+    executeAdbCommand(`adb -s ${deviceId} shell am start -a android.settings.SETTINGS`, (err: { message: any }, result: any) => {
         if (err) {
             console.error('Error open setting for device:', err);
             printToCommandOutput(`Error open setting for device: ${err.message}\n`);
@@ -202,8 +220,8 @@ const openSetting = deviceId => {
     });
 };
 
-const openWebView = deviceId => {
-    executeAdbCommand(`adb -s ${deviceId} shell am start -n com.example.webviewapp/.MainActivity`, (err, result) => {
+const openWebView = (deviceId: any) => {
+    executeAdbCommand(`adb -s ${deviceId} shell am start -n com.example.webviewapp/.MainActivity`, (err: { message: any }, result: any) => {
         if (err) {
             console.error('Error open setting for device:', err);
             printToCommandOutput(`Error open setting for device: ${err.message}\n`);
@@ -215,12 +233,12 @@ const openWebView = deviceId => {
 };
 
 // 更新中间件文件的函数
-function updateMiddleware(deviceId, middlewarePath) {
-    const updateStatus = document.getElementById('update-status');
+function updateMiddleware(deviceId: any, middlewarePath: any) {
+    const updateStatus = document.getElementById('update-status')!;
     updateStatus.textContent = `正在更新中间件文件 ${middlewarePath} 到设备 ${deviceId}...`;
 
     // Step 1: 执行 adb root 命令
-    executeAdbCommand(`adb -s ${deviceId} root`, (err, result) => {
+    executeAdbCommand(`adb -s ${deviceId} root`, (err: { message: any }, result: any) => {
         if (err) {
             updateStatus.textContent = `Error: ${err.message}`;
             return;
@@ -228,7 +246,7 @@ function updateMiddleware(deviceId, middlewarePath) {
         console.log('Root success', result);
 
         // Step 2: 执行 adb remount 命令
-        executeAdbCommand(`adb -s ${deviceId} remount`, (err, result) => {
+        executeAdbCommand(`adb -s ${deviceId} remount`, (err: { message: any }, result: any) => {
             if (err) {
                 updateStatus.textContent = `Error: ${err.message}`;
                 return;
@@ -240,7 +258,7 @@ function updateMiddleware(deviceId, middlewarePath) {
 
             console.log('Pushing middleware files:', pushCommand);
 
-            executeAdbCommand(pushCommand, (err, result) => {
+            executeAdbCommand(pushCommand, (err: { message: any }, result: any) => {
                 if (err) {
                     updateStatus.textContent = `Error pushing files: ${err.message}`;
                     return;
@@ -248,7 +266,7 @@ function updateMiddleware(deviceId, middlewarePath) {
                 console.log('Middleware files pushed successfully', result);
 
                 // Step 4: 执行 adb reboot 命令
-                executeAdbCommand(`adb -s ${deviceId} reboot`, (err, result) => {
+                executeAdbCommand(`adb -s ${deviceId} reboot`, (err: { message: any }, result: any) => {
                     if (err) {
                         updateStatus.textContent = `Error rebooting device: ${err.message}`;
                         return;
