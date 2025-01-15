@@ -1,4 +1,4 @@
-import { enableMonitorAdbPort, updateApk } from './feature';
+import { enableMonitorAdbPort, killMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateApk, updateMiddleware } from './feature';
 import { executeAdbCommand, getDeviceName, getFolderPaths, printToCommandOutput } from './utils';
 // 获取设备列表
 function getDeviceList() {
@@ -194,87 +194,19 @@ window.addEventListener('DOMContentLoaded', () => {
         console.log('Duration reverse port button clicked for device:', deviceId, 'with port:', port);
         enableMonitorAdbPort(deviceId, port); // 使用相同的端口号进行反向映射
     });
-});
 
-const openAppAnalyze = (deviceId: any) => {
-    executeAdbCommand(`adb -s ${deviceId} shell am start -n com.absinthe.libchecker/.features.home.ui.MainActivity`, (err: { message: any }, result: any) => {
-        if (err) {
-            console.error('Error open setting for device:', err);
-            printToCommandOutput(`Error open setting for device: ${err.message}\n`);
-        } else {
-            console.log('open setting for device successful');
-            printToCommandOutput('open setting for device successful\n');
-        }
-    });
-};
-
-const openSetting = (deviceId: any) => {
-    executeAdbCommand(`adb -s ${deviceId} shell am start -a android.settings.SETTINGS`, (err: { message: any }, result: any) => {
-        if (err) {
-            console.error('Error open setting for device:', err);
-            printToCommandOutput(`Error open setting for device: ${err.message}\n`);
-        } else {
-            console.log('open setting for device successful');
-            printToCommandOutput('open setting for device successful\n');
-        }
-    });
-};
-
-const openWebView = (deviceId: any) => {
-    executeAdbCommand(`adb -s ${deviceId} shell am start -n com.example.webviewapp/.MainActivity`, (err: { message: any }, result: any) => {
-        if (err) {
-            console.error('Error open setting for device:', err);
-            printToCommandOutput(`Error open setting for device: ${err.message}\n`);
-        } else {
-            console.log('open setting for device successful');
-            printToCommandOutput('open setting for device successful\n');
-        }
-    });
-};
-
-// 更新中间件文件的函数
-function updateMiddleware(deviceId: any, middlewarePath: any) {
-    const updateStatus = document.getElementById('update-status')!;
-    updateStatus.textContent = `正在更新中间件文件 ${middlewarePath} 到设备 ${deviceId}...`;
-
-    // Step 1: 执行 adb root 命令
-    executeAdbCommand(`adb -s ${deviceId} root`, (err: { message: any }, result: any) => {
-        if (err) {
-            updateStatus.textContent = `Error: ${err.message}`;
+    document.getElementById('kill-duration-reverse')?.addEventListener('click', () => {
+        const deviceId = getDeviceName();
+        const port = (document.getElementById('port') as HTMLInputElement).value;
+        if (!deviceId) {
+            alert('请选择设备');
             return;
         }
-        console.log('Root success', result);
-
-        // Step 2: 执行 adb remount 命令
-        executeAdbCommand(`adb -s ${deviceId} remount`, (err: { message: any }, result: any) => {
-            if (err) {
-                updateStatus.textContent = `Error: ${err.message}`;
-                return;
-            }
-            console.log('Remount success', result);
-
-            // Step 3: 执行 adb push 命令，推送中间件文件
-            const pushCommand = `adb -s ${deviceId} push ${middlewarePath} /vendor/bin/`;
-
-            console.log('Pushing middleware files:', pushCommand);
-
-            executeAdbCommand(pushCommand, (err: { message: any }, result: any) => {
-                if (err) {
-                    updateStatus.textContent = `Error pushing files: ${err.message}`;
-                    return;
-                }
-                console.log('Middleware files pushed successfully', result);
-
-                // Step 4: 执行 adb reboot 命令
-                executeAdbCommand(`adb -s ${deviceId} reboot`, (err: { message: any }, result: any) => {
-                    if (err) {
-                        updateStatus.textContent = `Error rebooting device: ${err.message}`;
-                        return;
-                    }
-                    console.log('Device rebooted successfully');
-                    updateStatus.textContent = '中间件更新成功，设备正在重启...';
-                });
-            });
-        });
+        if (!port) {
+            alert('请输入端口号');
+            return;
+        }
+        console.log('kill Duration reverse port button clicked for device:', deviceId, 'with port:', port);
+        killMonitorAdbPort(deviceId, port);
     });
-}
+});
