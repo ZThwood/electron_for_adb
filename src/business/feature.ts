@@ -154,4 +154,13 @@ const updateMiddleware = (deviceName: string, middlewarePath: string) => {
     });
 };
 
-export { updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort };
+const clearCommandOutput = () => {
+    const outputArea = document.getElementById('command-output');
+    if (!outputArea) {
+        return;
+    }
+    outputArea.textContent = '';
+    outputArea.scrollTop = outputArea.scrollHeight; // 自动滚动到最后
+};
+
+export { clearCommandOutput, updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort };

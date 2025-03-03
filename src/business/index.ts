@@ -1,4 +1,4 @@
-import { enableMonitorAdbPort, killMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateApk, updateMiddleware } from './feature';
+import { clearCommandOutput, enableMonitorAdbPort, killMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateApk, updateMiddleware } from './feature';
 import { executeAdbCommand, getDeviceName, getFolderPaths, printToCommandOutput } from './utils';
 // 获取设备列表
 function getDeviceList() {
@@ -208,5 +208,10 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         console.log('kill Duration reverse port button clicked for device:', deviceId, 'with port:', port);
         killMonitorAdbPort(deviceId, port);
+    });
+
+    document.getElementById('command-clear')?.addEventListener('click', () => {
+        console.log('clearCommandOutput');
+        clearCommandOutput();
     });
 });
