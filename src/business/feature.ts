@@ -7,7 +7,7 @@ const fs = require('fs');
 function updateApk(deviceName: string, apkPath: string) {
     const updateStatus = document.getElementById('update-apk-status')!;
     updateStatus.textContent = `正在更新apk ${apkPath} 到设备 ${deviceName}...`;
-    const command = `adb -s ${deviceName} -d install ${apkPath}`;
+    const command = `adb -s ${deviceName}  install -r -d ${apkPath}`;
 
     console.log('updateApk:', command);
 
@@ -42,19 +42,19 @@ const enableMonitorAdbPort = (deviceName: string, port: number | string) => {
     // 捕获标准输出
     powershell.stdout.on('data', (data: any) => {
         console.log(`enableMonitorAdbPort Output: ${data}`);
-        printToCommandOutput('enable monitor adb Port for device successful\n' + data);
+        // printToCommandOutput('enable monitor adb Port for device successful\n' + data);
     });
 
     // 捕获标准错误输出
     powershell.stderr.on('data', (data: any) => {
         console.error(`enableMonitorAdbPort Error: ${data}`);
-        printToCommandOutput('enable monitor adb Port for device Error\n' + data);
+        // printToCommandOutput('enable monitor adb Port for device Error\n' + data);
     });
 
     // 监听脚本执行结束
     powershell.on('close', (code: any) => {
         console.log(`enableMonitorAdbPort Script exited with code: ${code}`);
-        printToCommandOutput('enable monitor adb Port for device code\n' + code);
+        // printToCommandOutput('enable monitor adb Port for device code\n' + code);
     });
 
     powershellTarget[deviceName + '_' + port + '_powershell'] = powershell;
