@@ -10,10 +10,20 @@
     "baseUrl": ".",
     "resolveJsonModule": true,
     "isolatedModules": true, /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types" // 确保包含自定义类型路径
+    ],
+    "types": [
+      "node",
+      "electron"
+    ]
   },
-  // "include": [
-  //   "src/**/*.ts"
-  // ],
+  "include": [
+    "src/**/*.ts",
+    "types/**/*",
+    "src/types/**/*.d.ts"
+  ],
   "exclude": [
     "node_modules",
     "babel.config.js",

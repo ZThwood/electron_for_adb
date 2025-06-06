@@ -4,6 +4,7 @@
   "main": "dist/main.js",
   "license": "MIT",
   "devDependencies": {
+    "@types/electron": "^1.4.38",
     "@types/node": "^22.10.6",
     "electron": "16.0.6"
   },

@@ -3,6 +3,78 @@ import { executeAdbCommand, printToCommandOutput } from './utils';
 const { spawn } = require('child_process');
 const fs = require('fs');
 
+function pullMqttLog(deviceName: string, path: string) {
+    const updateStatus = document.getElementById('update-log-status')!;
+    updateStatus.textContent = `正在拉取 ${deviceName}日志到 ${path}...`;
+    const command = `adb -s ${deviceName} pull /data/vendor/siliconlabs_host/zgateway.log ${path}`;
+    console.log('pullLog:', command);
+
+    executeAdbCommand(`adb -s ${deviceName} root`, (err: { message: any }, result: any) => {
+        if (err) {
+            updateStatus.textContent = `Error: ${err.message}`;
+            return;
+        }
+        console.log('Root success', result);
+
+        // Step 2: 执行 adb remount 命令
+        executeAdbCommand(`adb -s ${deviceName} remount`, (err: { message: any }, result: any) => {
+            if (err) {
+                updateStatus.textContent = `Error: ${err.message}`;
+                return;
+            }
+            console.log('Remount success', result);
+
+            // Step 3: 执行 adb pull 命令，推送中间件文件
+            executeAdbCommand(command, (err: { message: any }, result: any) => {
+                console.log('successfully pull', err);
+
+                if (err) {
+                    updateStatus.textContent = `Error pull files: ${err.message}`;
+                    return;
+                }
+                console.log('successfully pull', result);
+
+                updateStatus.textContent = 'successfully pull log files';
+            });
+        });
+    });
+}
+
+function pullLog(deviceName: string, path: string) {
+    const updateStatus = document.getElementById('update-log-status')!;
+    updateStatus.textContent = `正在拉取 ${deviceName}日志到 ${path}...`;
+    const command = `adb -s ${deviceName} pull /data/data/com.eWeLinkControlPanel/files/ ${path}`;
+
+    console.log('pullLog:', command);
+    executeAdbCommand(`adb -s ${deviceName} root`, (err: { message: any }, result: any) => {
+        if (err) {
+            updateStatus.textContent = `Error: ${err.message}`;
+            return;
+        }
+        console.log('Root success', result);
+
+        // Step 2: 执行 adb remount 命令
+        executeAdbCommand(`adb -s ${deviceName} remount`, (err: { message: any }, result: any) => {
+            if (err) {
+                updateStatus.textContent = `Error: ${err.message}`;
+                return;
+            }
+            console.log('Remount success', result);
+
+            // Step 3: 执行 adb pull 命令，推送中间件文件
+            executeAdbCommand(command, (err: { message: any }, result: any) => {
+                if (err) {
+                    updateStatus.textContent = `Error pull files: ${err.message}`;
+                    return;
+                }
+                console.log('successfully pull', result);
+
+                updateStatus.textContent = 'successfully pull log files';
+            });
+        });
+    });
+}
+
 // 更新 apk
 function updateApk(deviceName: string, apkPath: string) {
     const updateStatus = document.getElementById('update-apk-status')!;
@@ -163,4 +235,4 @@ const clearCommandOutput = () => {
     outputArea.scrollTop = outputArea.scrollHeight; // 自动滚动到最后
 };
 
-export { clearCommandOutput, updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort };
+export { clearCommandOutput, updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort, pullLog, pullMqttLog };
