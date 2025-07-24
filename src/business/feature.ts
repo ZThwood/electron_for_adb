@@ -96,6 +96,7 @@ function updateApk(deviceName: string, apkPath: string) {
 
 const powershellTarget: Record<string, any> = {};
 const enableMonitorAdbPort = (deviceName: string, port: number | string) => {
+    killMonitorAdbPort(deviceName, port);
     // 定义脚本路径和参数
     const scriptPath = './src/business/shell_script/monitor_adb.ps1';
 
@@ -134,9 +135,11 @@ const enableMonitorAdbPort = (deviceName: string, port: number | string) => {
 
 const killMonitorAdbPort = (deviceName: string, port: number | string) => {
     const key = deviceName + '_' + port + '_powershell';
-    if (!key) {
-        printToCommandOutput('kill monitor adb Port for device code\n' + 'no device name or port');
+    if (!powershellTarget[key]) {
+        printToCommandOutput(key + 'not need to kill monitor adb Port');
+        return;
     }
+
     powershellTarget[key].kill(); // 停止子进程
     powershellTarget[key] = null;
     delete powershellTarget[key];

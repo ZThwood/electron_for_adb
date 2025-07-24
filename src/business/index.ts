@@ -196,6 +196,7 @@ window.addEventListener('DOMContentLoaded', () => {
             return;
         }
         console.log('Duration reverse port button clicked for device:', deviceId, 'with port:', port);
+
         enableMonitorAdbPort(deviceId, port); // 使用相同的端口号进行反向映射
     });
 
