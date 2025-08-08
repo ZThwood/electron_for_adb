@@ -1,78 +1,19 @@
-import { executeAdbCommand, printToCommandOutput } from './utils';
+import { execFile, ExecFileException } from 'child_process';
+import { executeAdbCommand, printToCommandOutput, pullDeviceLog } from './utils';
 
 const { spawn } = require('child_process');
-const fs = require('fs');
+const path = require('path');
+
+function pullZ2MLog(deviceName: string, path: string) {
+    pullDeviceLog(deviceName, path, '/data/data/com.termux/files/home/data/.logs/node/bridge-cube', 'successfully pull Z2M log files');
+}
 
 function pullMqttLog(deviceName: string, path: string) {
-    const updateStatus = document.getElementById('update-log-status')!;
-    updateStatus.textContent = `正在拉取 ${deviceName}日志到 ${path}...`;
-    const command = `adb -s ${deviceName} pull /data/vendor/siliconlabs_host/zgateway.log ${path}`;
-    console.log('pullLog:', command);
-
-    executeAdbCommand(`adb -s ${deviceName} root`, (err: { message: any }, result: any) => {
-        if (err) {
-            updateStatus.textContent = `Error: ${err.message}`;
-            return;
-        }
-        console.log('Root success', result);
-
-        // Step 2: 执行 adb remount 命令
-        executeAdbCommand(`adb -s ${deviceName} remount`, (err: { message: any }, result: any) => {
-            if (err) {
-                updateStatus.textContent = `Error: ${err.message}`;
-                return;
-            }
-            console.log('Remount success', result);
-
-            // Step 3: 执行 adb pull 命令，推送中间件文件
-            executeAdbCommand(command, (err: { message: any }, result: any) => {
-                console.log('successfully pull', err);
-
-                if (err) {
-                    updateStatus.textContent = `Error pull files: ${err.message}`;
-                    return;
-                }
-                console.log('successfully pull', result);
-
-                updateStatus.textContent = 'successfully pull log files';
-            });
-        });
-    });
+    pullDeviceLog(deviceName, path, '/data/vendor/siliconlabs_host/zgateway.log', 'successfully pull Mqtt log files');
 }
 
 function pullLog(deviceName: string, path: string) {
-    const updateStatus = document.getElementById('update-log-status')!;
-    updateStatus.textContent = `正在拉取 ${deviceName}日志到 ${path}...`;
-    const command = `adb -s ${deviceName} pull /data/data/com.eWeLinkControlPanel/files/ ${path}`;
-
-    console.log('pullLog:', command);
-    executeAdbCommand(`adb -s ${deviceName} root`, (err: { message: any }, result: any) => {
-        if (err) {
-            updateStatus.textContent = `Error: ${err.message}`;
-            return;
-        }
-        console.log('Root success', result);
-
-        // Step 2: 执行 adb remount 命令
-        executeAdbCommand(`adb -s ${deviceName} remount`, (err: { message: any }, result: any) => {
-            if (err) {
-                updateStatus.textContent = `Error: ${err.message}`;
-                return;
-            }
-            console.log('Remount success', result);
-
-            // Step 3: 执行 adb pull 命令，推送中间件文件
-            executeAdbCommand(command, (err: { message: any }, result: any) => {
-                if (err) {
-                    updateStatus.textContent = `Error pull files: ${err.message}`;
-                    return;
-                }
-                console.log('successfully pull', result);
-
-                updateStatus.textContent = 'successfully pull log files';
-            });
-        });
-    });
+    pullDeviceLog(deviceName, path, '/data/data/com.eWeLinkControlPanel/files/', 'successfully pull log files');
 }
 
 // 更新 apk
@@ -238,4 +179,31 @@ const clearCommandOutput = () => {
     outputArea.scrollTop = outputArea.scrollHeight; // 自动滚动到最后
 };
 
-export { clearCommandOutput, updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort, pullLog, pullMqttLog };
+const openZ2MLog = (deviceName: string) => {
+    const scriptPath = './src/business/shell_script/tail_bridge_cube.ps1';
+
+    const isWindows = process.platform === 'win32';
+    if (!isWindows) {
+        throw new Error('此功能仅支持 Windows');
+    }
+
+    // 使用 cmd.exe 启动 powershell，添加 `/k` 保持窗口不关闭
+    const cmd = `start cmd /k powershell -ExecutionPolicy Bypass -File "${scriptPath}" "${deviceName}"`;
+
+    const child = spawn(cmd, {
+        shell: true, // 必须启用 shell 以执行 cmd 命令
+        stdio: 'inherit',
+        detached: true, // 让子进程独立运行
+        windowsVerbatimArguments: true, // 防止 Windows 参数解析问题
+    });
+
+    child.unref(); // 防止父进程等待子进程
+
+    child.on('error', (err: any) => {
+        console.error('启动失败:', err);
+    });
+
+    return child;
+};
+
+export { clearCommandOutput, updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort, pullLog, pullMqttLog, pullZ2MLog, openZ2MLog };

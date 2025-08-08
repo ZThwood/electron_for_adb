@@ -1,6 +1,6 @@
-import { pullLog, clearCommandOutput, enableMonitorAdbPort, killMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateApk, updateMiddleware, pullMqttLog } from './feature';
+import { pullLog, clearCommandOutput, enableMonitorAdbPort, killMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateApk, updateMiddleware, pullMqttLog, pullZ2MLog, openZ2MLog } from './feature';
 import { preload, electronAPI } from './preload';
-import { executeAdbCommand, getDeviceName, getFolderPaths, printToCommandOutput } from './utils';
+import { executeAdbCommand, getDeviceName, getFolderPaths, printToCommandOutput, registerLogButton } from './utils';
 
 // index.ts
 preload();
@@ -220,57 +220,20 @@ window.addEventListener('DOMContentLoaded', () => {
         clearCommandOutput();
     });
 
-    document.getElementById('pullLog')?.addEventListener('click', async () => {
-        console.log('window.electronAPI', electronAPI);
+    registerLogButton('pullLog', pullLog, '请选择一个目录保存日志文件。点击确认后将会弹出目录选择窗口。', electronAPI);
 
-        const isConfirm = await electronAPI?.showConfirmDialog('日志导出', '请选择一个目录保存日志文件。点击确认后将会弹出目录选择窗口。');
-        if (!isConfirm) return; // 用户取消
+    registerLogButton('pullMqttLog', pullMqttLog, '请选择一个目录保存日志文件。点击确认后将会弹出目录选择窗口(路径不能包含中文)', electronAPI);
 
-        const result = await electronAPI?.openDirectoryDialog();
-        if (result && !result.canceled) {
-            const selectedDir = result.filePaths[0];
-            console.log('用户选择的目录:', selectedDir);
-            // 在这里执行你的日志拉取逻辑
-            if (!selectedDir) {
-                alert('请指定目录');
-                return;
-            }
+    registerLogButton('pullZ2MLog', pullZ2MLog, '请选择一个目录保存日志文件。点击确认后将会弹出目录选择窗口(路径不能包含中文)', electronAPI);
 
-            const deviceId = getDeviceName();
-            if (!deviceId) {
-                alert('请选择设备');
-                return;
-            }
-
-            pullLog(deviceId, selectedDir);
-            electronAPI?.showMessageBox('导出完成', `日志已保存到: ${selectedDir}`);
+    document.getElementById('openZ2MLog')?.addEventListener('click', () => {
+        console.log('openZ2MLog');
+        const deviceId = getDeviceName();
+        if (!deviceId) {
+            alert('请选择设备');
+            return;
         }
-    });
 
-    document.getElementById('pullMqttLog')?.addEventListener('click', async () => {
-        console.log('window.electronAPI', electronAPI);
-
-        const isConfirm = await electronAPI?.showConfirmDialog('日志导出', '请选择一个目录保存日志文件。点击确认后将会弹出目录选择窗口(路径不能包含中文)');
-        if (!isConfirm) return; // 用户取消
-
-        const result = await electronAPI?.openDirectoryDialog();
-        if (result && !result.canceled) {
-            const selectedDir = result.filePaths[0];
-            console.log('用户选择的目录:', selectedDir);
-            // 在这里执行你的日志拉取逻辑
-            if (!selectedDir) {
-                alert('请指定目录');
-                return;
-            }
-
-            const deviceId = getDeviceName();
-            if (!deviceId) {
-                alert('请选择设备');
-                return;
-            }
-
-            pullMqttLog(deviceId, selectedDir);
-            electronAPI?.showMessageBox('导出完成', `日志已保存到: ${selectedDir}`);
-        }
+        openZ2MLog(deviceId);
     });
 });
