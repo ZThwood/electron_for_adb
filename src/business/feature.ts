@@ -187,23 +187,38 @@ const openZ2MLog = (deviceName: string) => {
         throw new Error('此功能仅支持 Windows');
     }
 
-    // 使用 cmd.exe 启动 powershell，添加 `/k` 保持窗口不关闭
-    const cmd = `start cmd /k powershell -ExecutionPolicy Bypass -File "${scriptPath}" "${deviceName}"`;
+    executeAdbCommand(`adb -s ${deviceName} root`, (err: { message: any }, result: any) => {
+        if (err) {
+            return;
+        }
+        console.log('Root success', result);
 
-    const child = spawn(cmd, {
-        shell: true, // 必须启用 shell 以执行 cmd 命令
-        stdio: 'inherit',
-        detached: true, // 让子进程独立运行
-        windowsVerbatimArguments: true, // 防止 Windows 参数解析问题
+        // adb remount
+        executeAdbCommand(`adb -s ${deviceName} remount`, (err: { message: any }, result: any) => {
+            if (err) {
+                return;
+            }
+            console.log('Remount success', result);
+
+            // 使用 cmd.exe 启动 powershell，添加 `/k` 保持窗口不关闭
+            const cmd = `start cmd /k powershell -ExecutionPolicy Bypass -File "${scriptPath}" "${deviceName}"`;
+
+            const child = spawn(cmd, {
+                shell: true, // 必须启用 shell 以执行 cmd 命令
+                stdio: 'inherit',
+                detached: true, // 让子进程独立运行
+                windowsVerbatimArguments: true, // 防止 Windows 参数解析问题
+            });
+
+            child.unref(); // 防止父进程等待子进程
+
+            child.on('error', (err: any) => {
+                console.error('启动失败:', err);
+            });
+
+            return child;
+        });
     });
-
-    child.unref(); // 防止父进程等待子进程
-
-    child.on('error', (err: any) => {
-        console.error('启动失败:', err);
-    });
-
-    return child;
 };
 
 export { clearCommandOutput, updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort, pullLog, pullMqttLog, pullZ2MLog, openZ2MLog };
