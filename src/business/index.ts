@@ -1,4 +1,4 @@
-import { pullLog, clearCommandOutput, enableMonitorAdbPort, killMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateApk, updateMiddleware, pullMqttLog, pullZ2MLog, openZ2MLog } from './feature';
+import { pullLog, clearCommandOutput, enableMonitorAdbPort, killMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateApk, updateMiddleware, pullMqttLog, pullZ2MLog, openZ2MLog, clearZ2MCache } from './feature';
 import { preload, electronAPI } from './preload';
 import { executeAdbCommand, getDeviceName, getFolderPaths, printToCommandOutput, registerLogButton } from './utils';
 
@@ -235,5 +235,16 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         openZ2MLog(deviceId);
+    });
+
+    document.getElementById('clearZ2MCache')?.addEventListener('click', () => {
+        console.log('clearZ2MCache');
+        const deviceId = getDeviceName();
+        if (!deviceId) {
+            alert('请选择设备');
+            return;
+        }
+
+        clearZ2MCache(deviceId);
     });
 });

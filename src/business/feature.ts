@@ -221,4 +221,27 @@ const openZ2MLog = (deviceName: string) => {
     });
 };
 
-export { clearCommandOutput, updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort, pullLog, pullMqttLog, pullZ2MLog, openZ2MLog };
+const clearZ2MCache = (deviceName: string) => {
+    executeAdbCommand(`adb -s ${deviceName} root`, (err: { message: any }, result: any) => {
+        if (err) {
+            return;
+        }
+        console.log('Root success', result);
+
+        // adb remount
+        executeAdbCommand(`adb -s ${deviceName} shell rm -rf /data/data/com.termux/files/home/data/.bridge-cube2`, (err: { message: any }, result: any) => {
+            if (err) {
+                return;
+            }
+            console.log('Remount success', result);
+            executeAdbCommand(`adb -s ${deviceName} reboot`, (err: { message: any }, result: any) => {
+                if (err) {
+                    return;
+                }
+                console.log('Remount success', result);
+            });
+        });
+    });
+};
+
+export { clearZ2MCache, clearCommandOutput, updateApk, enableMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateMiddleware, killMonitorAdbPort, pullLog, pullMqttLog, pullZ2MLog, openZ2MLog };
