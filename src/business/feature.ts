@@ -1,5 +1,6 @@
 import { execFile, ExecFileException } from 'child_process';
 import { executeAdbCommand, printToCommandOutput, pullDeviceLog } from './utils';
+import { app } from 'electron';
 
 const { spawn } = require('child_process');
 const path = require('path');
@@ -39,7 +40,7 @@ const powershellTarget: Record<string, any> = {};
 const enableMonitorAdbPort = (deviceName: string, port: number | string) => {
     killMonitorAdbPort(deviceName, port);
     // 定义脚本路径和参数
-    const scriptPath = './src/business/shell_script/monitor_adb.ps1';
+    const scriptPath = path.join(__dirname, '../resources/script/monitor_adb.ps1');
 
     // 使用 PowerShell 执行脚本
     const powershell = spawn('powershell.exe', [
@@ -178,9 +179,8 @@ const clearCommandOutput = () => {
     outputArea.textContent = '';
     outputArea.scrollTop = outputArea.scrollHeight; // 自动滚动到最后
 };
-
 const openZ2MLog = (deviceName: string) => {
-    const scriptPath = './src/business/shell_script/tail_bridge_cube.ps1';
+    const scriptPath = path.join(__dirname, '../resources/script/tail_bridge_cube.ps1');
 
     const isWindows = process.platform === 'win32';
     if (!isWindows) {
@@ -229,7 +229,7 @@ const clearZ2MCache = (deviceName: string) => {
         console.log('Root success', result);
 
         // adb remount
-        executeAdbCommand(`adb -s ${deviceName} shell rm -rf /data/data/com.termux/files/home/data/.bridge-cube2`, (err: { message: any }, result: any) => {
+        executeAdbCommand(`adb -s ${deviceName} shell rm -rf /data/data/com.termux/files/home/data/.bridge-cube`, (err: { message: any }, result: any) => {
             if (err) {
                 return;
             }

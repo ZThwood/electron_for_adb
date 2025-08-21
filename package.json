@@ -6,11 +6,22 @@
   "devDependencies": {
     "@types/electron": "^1.4.38",
     "@types/node": "^22.10.6",
-    "electron": "16.0.6"
+    "electron": "16.0.6",
+    "electron-builder": "^26.0.12",
+    "electron-packager": "^17.1.2"
   },
   "scripts": {
     "start": "yarn build && electron .",
-    "build": "tsc"
+    "build": "tsc",
+    "package": "electron-builder",
+    "package-win": "electron-packager . electron_for_adb --platform=win32 --arch=x64 --out=release-builds --overwrite --icon=build/tool.ico"
+  },
+  "build": {
+    "appId": "com.example.electronforadb",
+    "win": {
+      "target": "nsis",
+      "icon": "build/adb.ico"
+    }
   },
   "dependencies": {
     "typescript": "^5.7.3"
