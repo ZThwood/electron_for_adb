@@ -1,4 +1,5 @@
 import { pullLog, clearCommandOutput, enableMonitorAdbPort, killMonitorAdbPort, openAppAnalyze, openSetting, openWebView, updateApk, updateMiddleware, pullMqttLog, pullZ2MLog, openZ2MLog, clearZ2MCache } from './feature';
+import { updateZ2M } from './installZ2M';
 import { preload, electronAPI } from './preload';
 import { executeAdbCommand, getDeviceName, getFolderPaths, printToCommandOutput, registerLogButton } from './utils';
 
@@ -246,5 +247,26 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         clearZ2MCache(deviceId);
+    });
+
+    // 新增的功能：更新中间件文件
+    document.getElementById('update-Z2M')?.addEventListener('click', () => {
+        const z2mFilePath: any = (document.getElementById('Z2M-directory') as HTMLInputElement).files;
+        // 判断是否选择了目录
+        if (!z2mFilePath.length) {
+            alert('请选择Z2M文件目录');
+            return;
+        }
+
+        const deviceId = getDeviceName();
+        if (!deviceId) {
+            alert('请选择设备');
+            return;
+        }
+
+        const filePath = z2mFilePath[0].path;
+        console.log('z2mFilePath', filePath);
+
+        updateZ2M(deviceId, filePath);
     });
 });
